@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#087f83" />
+  <title>In Out Paper Roll - Prototype</title>
+
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+  <style>
+    :root{
+      --teal:#087f83;
+      --teal-dark:#066b6f;
+      --bg:#f4fbfb;
+      --card:#ffffff;
+      --text:#232729;
+      --muted:#687477;
+      --line:#dbe8e8;
+      --danger:#c73737;
+      --shadow:0 10px 28px rgba(0,55,60,.09);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:linear-gradient(180deg,#f1fafa 0%,#f8fbfb 100%);
+      color:var(--text);
+    }
+    button,input,select{font:inherit}
+    .shell{max-width:760px;margin:0 auto;min-height:100vh}
+    .topbar{
+      position:sticky;top:0;z-index:20;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:14px 18px;
+      background:rgba(255,255,255,.94);
+      backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--line);
+    }
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{
+      width:38px;height:38px;border-radius:12px;background:var(--teal);
+      color:white;display:grid;place-items:center;font-weight:800;
+      box-shadow:0 8px 20px rgba(8,127,131,.24);
+    }
+    .brand strong{display:block;font-size:15px}
+    .brand small{color:var(--muted)}
+    .demo-pill{
+      padding:8px 10px;border-radius:999px;background:#e7f6f6;
+      color:var(--teal-dark);font-size:12px;font-weight:700;
+    }
+    .hero{padding:28px 20px 12px}
+    .hero h1{font-size:31px;line-height:1.15;margin:0 0 10px}
+    .hero p{margin:0;color:var(--muted);line-height:1.55}
+    .notice{
+      margin:16px 20px 0;padding:13px 14px;border-radius:14px;
+      background:#eaf7f7;border:1px solid #cfeaea;color:#315b5e;
+      font-size:13px;line-height:1.5;
+    }
+    form{padding:12px 20px 32px}
+    .card{
+      background:var(--card);border:1px solid var(--line);
+      border-radius:var(--radius);padding:20px;margin:14px 0;
+      box-shadow:var(--shadow);
+    }
+    .qtitle{font-size:18px;font-weight:720;margin-bottom:15px}
+    .req{color:#bd2e2e}
+    .radio-list{display:grid;gap:12px}
+    .choice{
+      display:flex;align-items:center;gap:12px;padding:13px 14px;
+      border:1px solid var(--line);border-radius:13px;background:white;
+      cursor:pointer;transition:.15s ease;
+    }
+    .choice:hover{border-color:#9dc9ca;background:#fbffff}
+    .choice input{width:20px;height:20px;accent-color:var(--teal)}
+    .field{
+      width:100%;padding:15px 14px;border:1px solid #cadcdd;
+      border-radius:13px;background:#fff;outline:none;
+      transition:.15s ease;
+    }
+    .field:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(8,127,131,.11)}
+    .row{display:grid;grid-template-columns:1fr auto;gap:10px}
+    .scan-btn{
+      border:0;border-radius:13px;padding:0 16px;background:var(--teal);
+      color:#fff;font-weight:750;cursor:pointer;min-height:52px;
+    }
+    .scan-btn:active{transform:translateY(1px)}
+    .hint{font-size:12px;color:var(--muted);margin-top:9px;line-height:1.45}
+    .select-wrap{position:relative}
+    .select-display{
+      width:100%;min-height:52px;display:flex;align-items:center;justify-content:space-between;
+      padding:13px 14px;border:1px solid #cadcdd;border-radius:13px;background:#fff;
+      cursor:pointer;text-align:left;
+    }
+    .selected-text{display:flex;flex-wrap:wrap;gap:7px}
+    .placeholder{color:#7b8588}
+    .tag{
+      background:#e7f6f6;color:#076b70;border:1px solid #cbe7e8;
+      padding:5px 8px;border-radius:999px;font-size:13px;font-weight:700;
+    }
+    .menu{
+      display:none;margin-top:8px;border:1px solid var(--line);
+      border-radius:13px;background:#fff;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.09);
+      max-height:310px;overflow-y:auto;
+    }
+    .menu.open{display:block}
+    .menu label{
+      display:flex;align-items:center;gap:10px;padding:13px 14px;
+      border-bottom:1px solid #edf3f3;cursor:pointer;
+    }
+    .menu label:last-child{border-bottom:0}
+    .menu input{width:19px;height:19px;accent-color:var(--teal)}
+    select.field{appearance:auto}
+    .actions{display:grid;gap:10px;margin-top:18px}
+    .submit{
+      border:0;border-radius:14px;padding:16px;background:var(--teal);
+      color:white;font-weight:800;font-size:17px;cursor:pointer;
+      box-shadow:0 10px 22px rgba(8,127,131,.22);
+    }
+    .secondary{
+      border:1px solid #bcd4d5;border-radius:14px;padding:14px;background:white;
+      color:#176a6e;font-weight:750;cursor:pointer;
+    }
+    .history{padding:0 20px 50px}
+    .history-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .history h2{font-size:20px;margin:0}
+    .history-list{display:grid;gap:10px}
+    .history-item{
+      background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;
+    }
+    .history-item strong{display:block;margin-bottom:5px}
+    .history-item small{color:var(--muted);line-height:1.5}
+    .empty{
+      padding:18px;border:1px dashed #bdd3d4;border-radius:14px;color:var(--muted);
+      text-align:center;background:rgba(255,255,255,.45)
+    }
+    .modal{
+      position:fixed;inset:0;background:rgba(10,25,27,.62);z-index:100;
+      display:none;align-items:flex-end;justify-content:center;
+    }
+    .modal.open{display:flex}
+    .sheet{
+      width:min(760px,100%);background:#fff;border-radius:22px 22px 0 0;
+      padding:18px 18px calc(20px + env(safe-area-inset-bottom));
+      max-height:90vh;overflow:auto;
+    }
+    .sheet-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .sheet-head h3{margin:0;font-size:20px}
+    .icon-btn{
+      width:40px;height:40px;border:0;border-radius:12px;background:#edf4f4;
+      cursor:pointer;font-size:21px;
+    }
+    #reader{
+      margin-top:14px;
+      width:100%;
+      min-height:280px;
+      background:#172426;
+      border-radius:16px;
+      overflow:hidden;
+    }
+    .scanner-state{
+      margin-top:12px;padding:12px;border-radius:12px;background:#eef8f8;
+      color:#315b5e;font-size:13px;line-height:1.45;
+    }
+    .scanner-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+    .scanner-actions button,.file-btn{min-height:46px}
+    .file-btn{
+      border:1px solid #bcd4d5;border-radius:13px;padding:12px;background:white;
+      color:#176a6e;font-weight:750;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;text-align:center;
+    }
+    .file-btn input{display:none}
+    .summary-grid{display:grid;grid-template-columns:130px 1fr;gap:9px 12px;margin-top:15px;font-size:14px}
+    .summary-grid .k{color:var(--muted)}
+    .footer-note{text-align:center;color:#809092;font-size:12px;padding:10px 20px 35px}
+    @media(max-width:520px){
+      .hero h1{font-size:28px}
+      .row{grid-template-columns:1fr}
+      .scan-btn{height:50px}
+      .summary-grid{grid-template-columns:110px 1fr}
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">PR</div>
+      <div><strong>Paper Roll Form</strong><small>Prototype operator</small></div>
+    </div>
+    <div class="demo-pill">DEMO</div>
+  </header>
+
+  <section class="hero">
+    <h1>In Out Paper Roll</h1>
+    <p>Prototype input Paper Roll yang lebih cepat untuk operator, termasuk pemindaian barcode lewat kamera HP.</p>
+  </section>
+
+  <div class="notice">
+    Data demo tersimpan <b>hanya di browser perangkat ini</b>. Untuk scan kamera langsung, halaman perlu dibuka lewat <b>HTTPS</b>.
+  </div>
+
+  <form id="paperForm">
+    <section class="card">
+      <div class="qtitle">1. Paper Roll In atau Out <span class="req">*</span></div>
+      <div class="radio-list">
+        <label class="choice"><input type="radio" name="flow" value="In" required> In</label>
+        <label class="choice"><input type="radio" name="flow" value="Out"> Out</label>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="qtitle">2. Group <span class="req">*</span></div>
+      <div class="radio-list">
+        <label class="choice"><input type="radio" name="group" value="A" required> A</label>
+        <label class="choice"><input type="radio" name="group" value="B"> B</label>
+        <label class="choice"><input type="radio" name="group" value="C"> C</label>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="qtitle">3. Roll Sisa / Utuh? <span class="req">*</span></div>
+      <div class="radio-list">
+        <label class="choice"><input type="radio" name="condition" value="Roll Sisa" required> Roll Sisa</label>
+        <label class="choice"><input type="radio" name="condition" value="Roll Utuh"> Roll Utuh</label>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="qtitle">4. Diameter In <span class="req">*</span></div>
+      <input class="field" id="diameter" type="number" inputmode="decimal" placeholder="Masukkan diameter" required>
+    </section>
+
+    <section class="card">
+      <div class="qtitle">5. Roll Number <span class="req">*</span></div>
+      <div class="row">
+        <input class="field" id="rollNumber" type="text" placeholder="Ketik atau scan Roll Number" autocomplete="off" required>
+        <button class="scan-btn" type="button" id="scanButton">▣ Scan Barcode</button>
+      </div>
+      <div class="hint">Tekan “Scan Barcode” lalu arahkan kamera HP ke barcode pada label Paper Roll. Roll Number tetap bisa diketik manual.</div>
+    </section>
+
+    <section class="card">
+      <div class="qtitle">6. Kode Paper Roll <span class="req">*</span></div>
+      <div class="select-wrap" id="codeSelect">
+        <button class="select-display" type="button" id="codeToggle">
+          <span class="selected-text" id="codeText"><span class="placeholder">Pilih kode Paper Roll</span></span>
+          <span>⌄</span>
+        </button>
+        <div class="menu" id="codeMenu">
+          <label><input type="checkbox" value="U"> Kode U</label>
+<label><input type="checkbox" value="N"> Kode N</label>
+<label><input type="checkbox" value="7"> Kode 7</label>
+<label><input type="checkbox" value="M"> Kode M</label>
+<label><input type="checkbox" value="S"> Kode S</label>
+<label><input type="checkbox" value="V"> Kode V</label>
+<label><input type="checkbox" value="O"> Kode O</label>
+<label><input type="checkbox" value="L"> Kode L</label>
+<label><input type="checkbox" value="2"> Kode 2</label>
+<label><input type="checkbox" value="B"> Kode B</label>
+<label><input type="checkbox" value="E"> Kode E</label>
+<label><input type="checkbox" value="F"> Kode F</label>
+<label><input type="checkbox" value="C"> Kode C</label>
+<label><input type="checkbox" value="5"> Kode 5</label>
+<label><input type="checkbox" value="6"> Kode 6</label>
+        </div>
+      </div>
+      <div class="hint">Bisa memilih lebih dari satu kode sekaligus.</div>
+    </section>
+
+    <section class="card">
+      <div class="qtitle">7. Lebar Paper Roll <span class="req">*</span></div>
+      <select class="field" id="width" required>
+        <option value="">Pilih lebar Paper Roll</option>
+        <option value="115">115 cm</option>
+<option value="120">120 cm</option>
+<option value="125">125 cm</option>
+<option value="130">130 cm</option>
+<option value="135">135 cm</option>
+<option value="140">140 cm</option>
+<option value="145">145 cm</option>
+<option value="150">150 cm</option>
+<option value="155">155 cm</option>
+<option value="160">160 cm</option>
+<option value="165">165 cm</option>
+<option value="170">170 cm</option>
+<option value="175">175 cm</option>
+<option value="180">180 cm</option>
+<option value="185">185 cm</option>
+<option value="190">190 cm</option>
+<option value="195">195 cm</option>
+<option value="200">200 cm</option>
+<option value="205">205 cm</option>
+<option value="210">210 cm</option>
+<option value="215">215 cm</option>
+<option value="220">220 cm</option>
+      </select>
+      <div class="hint">Pilihan lebar tersedia dari 115 cm sampai 220 cm dengan selang 5 cm.</div>
+    </section>
+
+    <section class="card">
+      <div class="qtitle">8. Kualitas Warna <span class="req">*</span></div>
+      <div class="radio-list">
+        <label class="choice"><input type="radio" name="colorQuality" value="OK" required> OK</label>
+        <label class="choice"><input type="radio" name="colorQuality" value="Not OK"> Not OK</label>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="qtitle">9. Black / White Spot <span class="req">*</span></div>
+      <div class="radio-list">
+        <label class="choice"><input type="radio" name="spot" value="OK" required> OK</label>
+        <label class="choice"><input type="radio" name="spot" value="Not OK"> Not OK</label>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button class="submit" type="submit">Kirim Data</button>
+      <button class="secondary" type="button" id="previewBtn">Lihat Ringkasan</button>
+    </div>
+  </form>
+
+  <section class="history">
+    <div class="history-head">
+      <h2>Riwayat Demo</h2>
+      <button class="secondary" type="button" id="clearHistory" style="padding:8px 11px;font-size:12px">Hapus</button>
+    </div>
+    <div class="history-list" id="historyList"></div>
+  </section>
+
+  <div class="footer-note">Prototype untuk demonstrasi alur kerja — bukan sistem produksi.</div>
+</div>
+
+<div class="modal" id="scannerModal">
+  <div class="sheet">
+    <div class="sheet-head">
+      <div>
+        <h3>Scan Barcode Roll Number</h3>
+        <div class="hint">Gunakan kamera belakang HP.</div>
+      </div>
+      <button class="icon-btn" type="button" id="closeScanner">×</button>
+    </div>
+
+    <div id="reader"></div>
+
+    <div class="scanner-state" id="scannerState">Menunggu kamera...</div>
+
+    <div class="scanner-actions">
+      <label class="file-btn">
+        📷 Foto / pilih barcode
+        <input id="barcodeFile" type="file" accept="image/*" capture="environment">
+      </label>
+      <button class="secondary" type="button" id="restartScanner">Coba Kamera Lagi</button>
+    </div>
+
+    <div class="actions">
+      <button class="scan-btn" type="button" id="closeScanner2">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="summaryModal">
+  <div class="sheet">
+    <div class="sheet-head">
+      <h3>Ringkasan Input</h3>
+      <button class="icon-btn" type="button" id="closeSummary">×</button>
+    </div>
+    <div class="summary-grid" id="summaryGrid"></div>
+    <div class="actions">
+      <button class="scan-btn" type="button" id="closeSummary2" style="height:48px">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const $$ = s => [...document.querySelectorAll(s)];
+  const form = $('#paperForm');
+  const codeMenu = $('#codeMenu');
+  const codeText = $('#codeText');
+  const scannerModal = $('#scannerModal');
+  const summaryModal = $('#summaryModal');
+  const scannerState = $('#scannerState');
+
+  let html5QrCode = null;
+  let scannerRunning = false;
+
+  function selectedCodes(){
+    return $$('#codeMenu input:checked').map(x => x.value);
+  }
+
+  function updateCodeText(){
+    const vals = selectedCodes();
+    codeText.innerHTML = vals.length
+      ? vals.map(v => `<span class="tag">${v}</span>`).join('')
+      : '<span class="placeholder">Pilih kode Paper Roll</span>';
+  }
+
+  $('#codeToggle').addEventListener('click', () => codeMenu.classList.toggle('open'));
+  $$('#codeMenu input').forEach(i => i.addEventListener('change', updateCodeText));
+  document.addEventListener('click', e => {
+    if (!$('#codeSelect').contains(e.target)) codeMenu.classList.remove('open');
+  });
+
+  function radio(name){
+    return document.querySelector(`input[name="${name}"]:checked`)?.value || '';
+  }
+
+  function dataFromForm(){
+    return {
+      flow: radio('flow'),
+      group: radio('group'),
+      condition: radio('condition'),
+      diameter: $('#diameter').value.trim(),
+      rollNumber: $('#rollNumber').value.trim(),
+      codes: selectedCodes(),
+      width: $('#width').value,
+      colorQuality: radio('colorQuality'),
+      spot: radio('spot')
+    };
+  }
+
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  function showSummary(data){
+    const rows = [
+      ['In / Out', data.flow || '-'],
+      ['Group', data.group || '-'],
+      ['Kondisi Roll', data.condition || '-'],
+      ['Diameter', data.diameter || '-'],
+      ['Roll Number', data.rollNumber || '-'],
+      ['Kode Paper Roll', data.codes.length ? data.codes.join(', ') : '-'],
+      ['Lebar', data.width || '-'],
+      ['Kualitas Warna', data.colorQuality || '-'],
+      ['Black/White Spot', data.spot || '-']
+    ];
+    $('#summaryGrid').innerHTML = rows.map(([k,v]) =>
+      `<div class="k">${k}</div><div><b>${escapeHtml(String(v))}</b></div>`
+    ).join('');
+    summaryModal.classList.add('open');
+  }
+
+  $('#previewBtn').addEventListener('click', () => showSummary(dataFromForm()));
+  $('#closeSummary').addEventListener('click', () => summaryModal.classList.remove('open'));
+  $('#closeSummary2').addEventListener('click', () => summaryModal.classList.remove('open'));
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const data = dataFromForm();
+
+    if (!data.codes.length){
+      alert('Pilih minimal satu Kode Paper Roll.');
+      $('#codeToggle').scrollIntoView({behavior:'smooth', block:'center'});
+      return;
+    }
+
+    const record = {...data, time:new Date().toISOString()};
+    const history = JSON.parse(localStorage.getItem('paperRollHistory') || '[]');
+    history.unshift(record);
+    localStorage.setItem('paperRollHistory', JSON.stringify(history.slice(0,20)));
+    renderHistory();
+    showSummary(data);
+  });
+
+  function renderHistory(){
+    const history = JSON.parse(localStorage.getItem('paperRollHistory') || '[]');
+    const list = $('#historyList');
+
+    if (!history.length){
+      list.innerHTML = '<div class="empty">Belum ada data demo yang dikirim.</div>';
+      return;
+    }
+
+    list.innerHTML = history.map(r => {
+      const d = new Date(r.time);
+      const when = d.toLocaleString('id-ID', {dateStyle:'medium', timeStyle:'short'});
+      return `<div class="history-item">
+        <strong>${escapeHtml(r.rollNumber)} · ${escapeHtml(r.flow)}</strong>
+        <small>${escapeHtml(r.condition)} · Group ${escapeHtml(r.group)} · ${escapeHtml(r.width)} cm<br>
+        Kode: ${escapeHtml((r.codes||[]).join(', '))} · ${escapeHtml(when)}</small>
+      </div>`;
+    }).join('');
+  }
+
+  $('#clearHistory').addEventListener('click', () => {
+    if (confirm('Hapus seluruh riwayat demo di perangkat ini?')){
+      localStorage.removeItem('paperRollHistory');
+      renderHistory();
+    }
+  });
+
+  renderHistory();
+
+  async function stopScanner(){
+    try {
+      if (html5QrCode && scannerRunning) {
+        await html5QrCode.stop();
+        scannerRunning = false;
+      }
+    } catch (_) {}
+    try {
+      if (html5QrCode) await html5QrCode.clear();
+    } catch (_) {}
+  }
+
+  function onScanSuccess(decodedText){
+    $('#rollNumber').value = decodedText;
+    scannerState.innerHTML = `Berhasil: <b>${escapeHtml(decodedText)}</b>`;
+    if (navigator.vibrate) navigator.vibrate(120);
+    setTimeout(closeScanner, 500);
+  }
+
+  async function startScanner(){
+    await stopScanner();
+
+    if (typeof Html5Qrcode === 'undefined'){
+      scannerState.innerHTML = 'Library scanner belum termuat. Pastikan HP terhubung internet.';
+      return;
+    }
+
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost'){
+      scannerState.innerHTML =
+        '<b>Kamera langsung membutuhkan HTTPS.</b><br>' +
+        'Jika halaman dibuka dari WhatsApp sebagai <code>content://</code>, browser dapat menolak izin kamera. ' +
+        'Gunakan tombol <b>Foto / pilih barcode</b> atau buka versi hosting HTTPS.';
+    } else {
+      scannerState.textContent = 'Meminta izin kamera...';
+    }
+
+    html5QrCode = new Html5Qrcode('reader');
+
+    try {
+      const cameras = await Html5Qrcode.getCameras();
+      if (!cameras || !cameras.length) throw new Error('Kamera tidak ditemukan');
+
+      let cameraId = cameras[0].id;
+      const back = cameras.find(c => /back|rear|environment/i.test(c.label));
+      if (back) cameraId = back.id;
+
+      await html5QrCode.start(
+        cameraId,
+        {
+          fps: 10,
+          qrbox: {width:280,height:170},
+          aspectRatio: 1.5
+        },
+        onScanSuccess,
+        () => {}
+      );
+
+      scannerRunning = true;
+      scannerState.textContent = 'Arahkan barcode label Paper Roll ke kotak kamera. Scan berjalan otomatis.';
+    } catch (err) {
+      scannerState.innerHTML =
+        '<b>Kamera belum bisa digunakan.</b><br>' +
+        escapeHtml(err?.message || String(err)) +
+        '<br><br>Buka website melalui HTTPS dan pilih Izinkan kamera saat browser meminta izin.';
+    }
+  }
+
+  async function openScanner(){
+    scannerModal.classList.add('open');
+    scannerState.textContent = 'Menyiapkan scanner...';
+    setTimeout(startScanner, 100);
+  }
+
+  async function closeScanner(){
+    await stopScanner();
+    scannerModal.classList.remove('open');
+  }
+
+  $('#scanButton').addEventListener('click', openScanner);
+  $('#closeScanner').addEventListener('click', closeScanner);
+  $('#closeScanner2').addEventListener('click', closeScanner);
+  $('#restartScanner').addEventListener('click', startScanner);
+
+  scannerModal.addEventListener('click', e => {
+    if (e.target === scannerModal) closeScanner();
+  });
+
+  $('#barcodeFile').addEventListener('change', async e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (typeof Html5Qrcode === 'undefined'){
+      scannerState.textContent = 'Library scanner belum termuat. Pastikan HP terhubung internet.';
+      return;
+    }
+
+    await stopScanner();
+    html5QrCode = new Html5Qrcode('reader');
+
+    try {
+      scannerState.textContent = 'Membaca barcode dari foto...';
+      const result = await html5QrCode.scanFile(file, true);
+      onScanSuccess(result);
+    } catch (err) {
+      scannerState.innerHTML =
+        '<b>Barcode belum terbaca dari foto.</b><br>Coba foto lebih dekat, terang, lurus, dan tidak blur.';
+    }
+
+    e.target.value = '';
+  });
+
+  summaryModal.addEventListener('click', e => {
+    if (e.target === summaryModal) summaryModal.classList.remove('open');
+  });
+})();
+</script>
+</body>
+</html>
